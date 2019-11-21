@@ -1,0 +1,155 @@
+Apriori Algorithm
+
+# Before that install apyori library use below code 
+# pip install apyori
+# Import  libraries
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from apyori import apriori
+
+# lOad the Data sets
+
+store_data = pd.read_csv('C:\\Users\\ssc\\Desktop\\Apriori Full In Detail\\store_data.csv')
+
+# See the Data by using head function
+
+store_data.head()
+
+# Read data without hearders
+
+store_data=pd.read_csv('C:\\Users\\ssc\\Desktop\\Apriori Full In Detail\\store_data.csv',header=None)
+
+# Run For loop to remove all NAN Values
+
+for i,j in enumerate(records):
+    while 'nan' in records[i]: records[i].remove('nan')
+
+# Creat empty list and After that append that list by using .append function below line converts dataframe
+# into the list for that run for loop, while doing this also convert your data into string which help us
+# for indexing and doing lots of operations.... By doing this transformation we are converting our data 
+# Into required format which needed for apriori Algorithm 
+
+records = []
+for i in range(0, 7501):
+    records.append([str(store_data.values[i,j]) for j in range(0, 20)])
+
+# Run Apriori Algorithm for (min_support=0.0045, min_confidence=0.2, min_lift=3, min_length=4)
+
+association_rules = apriori(records, min_support=0.0045, min_confidence=0.2, min_lift=3, min_length=4)
+association_results = list(association_rules)
+
+# See the results
+
+print(len(association_results))
+
+print(association_results[0])
+
+# Run for loop to get whole results that we required
+
+for item in association_results:
+    pair = item[0] 
+    items = [x for x in pair]
+    print("Rule: " + items[0] + " -> " + items[1])
+    print("Support: " + str(item[1]))
+    print("Confidence: " + str(item[2][0][2]))
+    print("Lift: " + str(item[2][0][3]))
+    print("=====================================")
+
+
+# lots of scope is there to modify this projects:- 1) Here we just find one to one association we can do
+# One to many association Also
+
+# Rocommender system Algorithms are the Advancement of this algorithm .... this algorithm provide simple and Basic Idea of Association...........
+
+
+=================================================================================
+=================================================================================
+
+The following piece of code will help you to see all the results in a Dataframe.
+
+results = []
+for item in association_results:
+lhs = " - ".join(list(item[2][0].items_base))
+rhs = " - ".join(list(item[2][0].items_add))
+support = item.support
+freq = support * len(df_categories)
+confidence = item[2][0].confidence
+lift = item[2][0].lift
+rows = (lhs, rhs,support,confidence,lift, freq)
+results.append(rows)
+
+#out of the for
+labels = ['LHS','RHS','Support','Confidence','Lift', 'Frequency']
+rules_out = pd.DataFrame.from_records(results, columns = labels)
+
+==================================================================================
+Dealing with NA values
+==================================================================================
+
+records = []
+for i in range(0, 7501):
+records.append([str(store_data.values[i,j]) for j in range(0, 20) if str(store_data.values[i,j]) != 'nan'])
+==================================================================================
+
+==================================================================================
+
+One to many Relations
+
+==================================================================================
+
+I found something weird in the script that shows each rule, beside the association_rules instead association_results variable.
+Looking into the results from that script I found this:
+
+=====================================
+Rule: spaghetti -> frozen vegetables
+Support: 0.005999200106652446
+Confidence: 0.21531100478468898
+Lift: 3.0131489680782684
+=====================================
+(...)
+=====================================
+Rule: spaghetti -> frozen vegetables
+Support: 0.004532728969470737
+Confidence: 0.28813559322033894
+Lift: 3.0228043143297376
+=====================================
+
+Which makes no sense... there other examples of repeated rules with different results if you look for.
+
+Another thing that I thing it was strange is that all relations are 1 to 1. According to the documentation, it can be n to 1 too and there is no result other than 1 to 1. So I decided to explore the association_results. Here things get interesting. I found rules with more than 2 products. Below is the code I used to get one example of this:
+
+# line code from the script:
+items = [x for x in pair]
+
+# here is the modified code from script that I run in the console:
+items = [x for x in association_results[47][0]]
+print(items)
+
+# here is what I found in the screen:
+['milk', 'mineral water', 'nan', 'spaghetti', 'frozen vegetables']
+
+This means that my relation is from the first position (milk) to the second position (mineral water), which I believe is wrong. Exploring a little bit more I found two fields, one with the data ['nan', 'milk', 'mineral water', 'spaghetti'] and the other with ['frozen vegetables']. Bellow is the code I used to print all the data:
+
+
+for item in association_results:
+# location of the two field, one with the "from" (item[2][0][0]) and the other
+# with "to" (item[2][0][1]) of the rule.
+print("Rule: " + str(list(item[2][0][0])) + " -> " + str(list(item[2][0][1])))
+
+#second index of the inner list
+print("Support: " + str(item[1]))
+
+#third index of the list located at 0th
+#of the third index of the inner list
+
+print("Confidence: " + str(item[2][0][2]))
+print("Lift: " + str(item[2][0][3]))
+print("=====================================")
+
+Please, let me know if I understand things incorrectly.
+BTW, this article is the best I saw. Very well written and easy to understand. Thanks Usman!!! =D
+
+=============================================================================================================================================================================================================================================================================================================================================================
+
